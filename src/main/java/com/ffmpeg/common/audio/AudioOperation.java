@@ -45,9 +45,10 @@ public class AudioOperation {
      * @return
      */
     public Result audioConcat(String bgmOutPath, String... bgmInputPath) {
-            if(StringUtils.isBlank(bgmOutPath) || bgmInputPath.length <= 0) {
-                throw new FFMpegExceptionn("请输入正确的音频输入和输出路径");
-            }
+        if(StringUtils.isBlank(bgmOutPath) || bgmInputPath.length <= 0) {
+            throw new FFMpegExceptionn("请输入正确的音频输入和输出路径");
+        }
+        BaseFileUtil.checkAndMkdir(bgmOutPath);
         try {
             List<String> bgmList = Arrays.asList(bgmInputPath);
 
@@ -78,10 +79,10 @@ public class AudioOperation {
     /**
      * 通过指定开始时间和结束时间 裁剪音频
      *
-     * @param bgmInputPath
-     * @param bgmOutPath
-     * @param startTime
-     * @param endTime
+     * @param bgmInputPath 音频输入绝对路径
+     * @param bgmOutPath 音频输出绝对路径
+     * @param startTime 开始时间
+     * @param endTime 截取秒数
      * @return
      */
     public Result audioCut(String bgmInputPath, String bgmOutPath, String startTime, String endTime) {
@@ -95,6 +96,8 @@ public class AudioOperation {
             throw new FFMpegExceptionn("时间格式错误");
         }
         try {
+            BaseFileUtil.checkAndMkdir(bgmOutPath);
+
             Stream<String> stream = Stream.of(ffmpegEXE, "-i", bgmInputPath, "-ss", startTime, "-t",
                     endTime, "-acodec", "copy", bgmOutPath);
 

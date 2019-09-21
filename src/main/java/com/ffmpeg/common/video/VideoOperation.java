@@ -17,6 +17,12 @@ import java.util.List;
  * //        https://blog.csdn.net/Jason_Lewis/article/details/90696878
  * //        https://blog.csdn.net/wangjiang_qianmo/article/details/88431476
  *
+ * 水印和字幕
+ * https://www.jianshu.com/p/c0e151775075
+ * https://www.jianshu.com/p/9b3375c2e2c1
+ * https://cloud.tencent.com/developer/article/1032348
+ * https://blog.csdn.net/m0_37684310/article/details/78257779
+ *
  * @auther alan.chen
  * @time 2019/9/11 11:20 AM
  */
@@ -46,6 +52,8 @@ public class VideoOperation {
      */
     public Result videoConvert(String inputVideo, String outputVideo)  {
         //  ffmpeg -i input.mp4 -y out.mp4
+        // ffmpeg -i in.mov -vcodec copy -acodec copy out.mp4  // mov --> mp4
+        // ffmpeg -i in.flv -vcodec copy -acodec copy out.mp4
         try {
             if(StringUtils.isBlank(inputVideo) || StringUtils.isBlank(outputVideo)) {
                 throw new FFMpegExceptionn("videoInputFullPath or videoOutFullPath must not be null");
@@ -55,10 +63,16 @@ public class VideoOperation {
             List<String> commands = new ArrayList<String>();
             commands.add(ffmpegEXE);
 
+            commands.add("-y");
             commands.add("-i");
             commands.add(inputVideo);
 
-            commands.add("-y");
+            commands.add("-vcodec");
+            commands.add("copy");
+            commands.add("-acodec");
+
+            //commands.add("-y");
+            commands.add("copy");
             commands.add(outputVideo);
 
             ProcessBuilder builder = new ProcessBuilder(commands).redirectErrorStream(true);
@@ -261,7 +275,7 @@ public class VideoOperation {
     }
 
     /**
-     * 视频裁剪
+     * 视频的页面长宽进行裁剪
      *
      * @param inputVideo 需要操作的原始视频绝对路径
      * @param outWidth 处理之后的视频的宽度
@@ -334,6 +348,156 @@ public class VideoOperation {
             throw new FFMpegExceptionn(e.getMessage());
         }
     }
+
+    /**
+     * 调节视频帧数
+     *
+     * @param inputVideo 需要操作的原始视频绝对路径
+     * @param fps 需要调节到多少帧
+     * @param outputVideo 处理之后生成的新的视频绝对路径
+     * @return
+     */
+    public Result videoFps(String inputVideo, Integer fps, String outputVideo) {
+//      ffmpeg -y -i in.mp4 -r 15 out.mp4
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-y");
+            commands.add("-i");
+            commands.add(inputVideo);
+
+            commands.add("-r");
+            commands.add(String.valueOf(fps));
+
+            commands.add(outputVideo);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+    /**
+     * gif转换为video
+     *
+     * @param gif gif绝对路径
+     * @param outputVideo 输出视频绝对路径
+     * @return
+     */
+    public Result gifConvertToVideo(String gif, String outputVideo) {
+//      ffmpeg -i in.gif -vf scale=420:-2,format=yuv420p out.mp4  // gif --> mp4
+        try {
+            BaseFileUtil.checkAndMkdir(outputVideo);
+
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-y");
+            commands.add("-i");
+            commands.add(gif);
+
+            commands.add("-vf");
+
+            commands.add("scale=420:-2,format=yuv420p");
+
+            commands.add(outputVideo);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+    /**
+     * 视频转gif
+     *
+     * @param inputVideo 需操作视频的绝对路径
+     * @param outputGif 生成gif的输出绝对路径
+     * @param highQuality 是否生成高质量gif
+     * @return
+     */
+    public Result videoConvertToGif(String inputVideo,  String outputGif, boolean highQuality) {
+//      ffmpeg -i src.mp4 -b 2048k des.gif
+//      ffmpeg -i src.mp4 des.gif
+        try {
+            BaseFileUtil.checkAndMkdir(outputGif);
+
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-y");
+            commands.add("-i");
+            commands.add(inputVideo);
+
+            if(highQuality) {
+                commands.add("-b");
+                commands.add("2048k");
+            }
+
+            commands.add(outputGif);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+
+    /**
+     * 对视频的播放时间进行裁剪
+     *
+     * @param inputVideo 原始需要操作视频的绝对路径
+     * @param startTime 开始裁剪的时间 支持格式： 2  或  00:00:02 从2秒开始
+     * @param seconds  剪裁持续的时间 支持格式： 3 或 00:00:03 持续3秒
+     * @param outputVideo 输出视频的绝对路径
+     * @return
+     */
+    public Result videoCut(String inputVideo,String startTime, String seconds, String outputVideo) {
+//      ffmpeg -ss 10 -t 15 -accurate_seek -i test.mp4 -codec copy -avoid_negative_ts 1 cut.mp4
+//      ffmpeg -i src.mp4  -ss 00:00:00 -t 00:00:20 des.mp4
+        try {
+            BaseFileUtil.checkAndMkdir(outputVideo);
+
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-y");
+            commands.add("-ss");
+            commands.add(startTime);
+
+            commands.add("-accurate_seek");
+
+            commands.add("-i");
+            commands.add(inputVideo);
+
+            commands.add("-codec");
+            commands.add("-copy");
+            commands.add("-avoid_negative_ts");
+            commands.add("1");
+
+            commands.add(outputVideo);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+
+
 
     /*
     *
