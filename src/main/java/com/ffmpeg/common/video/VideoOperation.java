@@ -4,24 +4,13 @@ import com.ffmpeg.common.FFMpegExceptionn;
 import com.ffmpeg.common.common.StreamHanlerCommon;
 import com.ffmpeg.common.response.Result;
 import com.ffmpeg.common.utils.BaseFileUtil;
-import org.apache.commons.lang3.StringUtils;
+import com.ffmpeg.common.utils.StrUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * //        https://blog.csdn.net/baohonglai/article/details/50535955
- * //        https://cloud.tencent.com/developer/article/1119403
- * //        http://www.cocoachina.com/articles/34551
- * //        https://blog.csdn.net/Jason_Lewis/article/details/90696878
- * //        https://blog.csdn.net/wangjiang_qianmo/article/details/88431476
- *
- * 水印和字幕
- * https://www.jianshu.com/p/c0e151775075
- * https://www.jianshu.com/p/9b3375c2e2c1
- * https://cloud.tencent.com/developer/article/1032348
- * https://blog.csdn.net/m0_37684310/article/details/78257779
  *
  * @auther alan.chen
  * @time 2019/9/11 11:20 AM
@@ -55,7 +44,7 @@ public class VideoOperation {
         // ffmpeg -i in.mov -vcodec copy -acodec copy out.mp4  // mov --> mp4
         // ffmpeg -i in.flv -vcodec copy -acodec copy out.mp4
         try {
-            if(StringUtils.isBlank(inputVideo) || StringUtils.isBlank(outputVideo)) {
+            if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputVideo)) {
                 throw new FFMpegExceptionn("videoInputFullPath or videoOutFullPath must not be null");
             }
             BaseFileUtil.checkAndMkdir(inputVideo);
@@ -96,6 +85,11 @@ public class VideoOperation {
     public Result mergeVideoAndBgm(String bgm, String inputVideo, String outputVideo, double seconds) {
 //     保留原声合并音视频 ffmpeg -i bgm.mp3 -i input.mp4 -t 6 -filter_complex amix=inputs=2 output.mp4
         try {
+            if(StrUtils.checkBlank(bgm) || StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputVideo) || seconds <= 0) {
+                throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+            }
+            BaseFileUtil.checkAndMkdir(outputVideo);
+
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
 
@@ -133,6 +127,11 @@ public class VideoOperation {
     public Result getVideoCoverImg(String inputVideo, String coverOut) {
 //        ffmpeg -ss 00:00:01 -y -i input.mp4 -vframes 1 out.jpg
         try {
+            if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(coverOut)) {
+                throw new FFMpegExceptionn("请输入视频路径或封面图片输入参数");
+            }
+            BaseFileUtil.checkAndMkdir(coverOut);
+
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
 
@@ -167,15 +166,20 @@ public class VideoOperation {
      * @param coverOutPath 截图生成的路径（图片名称会以001 002... 命名）
      * @return
      */
-    public Result getVideoCoverImgs(String startSeconds, String inputVideo,Integer everySecondImg, Integer seconds,String coverOutPath) {
+    public Result getVideoCoverImgs(Integer startSeconds, String inputVideo,Integer everySecondImg, Integer seconds,String coverOutPath) {
 //        ffmpeg -y -ss 0 -i 2222.mp4 -f image2 -r 1 -t 3 -q:a 1 ./%2d.jpg
         try {
+            if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(coverOutPath) || everySecondImg <= 0 || startSeconds <= 0 || seconds <= 0) {
+                throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+            }
+            BaseFileUtil.checkAndMkdir(coverOutPath);
+
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
 
             commands.add("-y");
             commands.add("-ss");
-            commands.add(startSeconds);
+            commands.add(String.valueOf(startSeconds));
 
             commands.add("-i");
             commands.add(inputVideo);
@@ -212,6 +216,11 @@ public class VideoOperation {
      */
     public Result wipeAudio(String inputVideo, String outputVideo) {
 //       ffmpeg -y -i source.mp4 -an -vcodec copy output.mp4
+        if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputVideo)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(outputVideo);
+
         try {
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
@@ -246,6 +255,12 @@ public class VideoOperation {
      */
     public Result videoScale(String inputVideo, String outWidth, String outHeight, String outputVideo) {
 //       ffmpeg -y -i in.mp4 -vf scale=360:640 -acodec aac -vcodec h264 out.mp4
+
+        if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputVideo)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(outputVideo);
+
         try {
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
@@ -285,6 +300,11 @@ public class VideoOperation {
      */
     public Result videoCrop(String inputVideo, String outWidth, String outHeight, String x, String y, String outputVideo) {
 //       ffmpeg -y -i in.mp4 -strict -2 -vf crop=1080:1080:0:420 out.mp4
+        if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputVideo)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(outputVideo);
+
         try {
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
@@ -322,6 +342,15 @@ public class VideoOperation {
      */
     public Result videoRotate(String inputVideo, Integer angleNum, String outWidth, String outHeight, String outputVideo) {
 //       ffmpeg -i in.mp4 -vf rotate=PI/2:ow=1080:oh=1920 out.mp4
+        if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputVideo)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(outputVideo);
+
+        if(angleNum != 1 && angleNum != 2) {
+            throw new FFMpegExceptionn("非法参数，旋转角度需为-> 1：180deg or 2：90deg");
+        }
+
         try {
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
@@ -332,7 +361,7 @@ public class VideoOperation {
 
             commands.add("-vf");
 
-            if(StringUtils.isNotBlank(outWidth) && StringUtils.isNotBlank(outHeight)) {
+            if(StrUtils.checkNotBlank(outWidth) && StrUtils.checkNotBlank(outHeight)) {
                 commands.add("rotate=PI/"+ angleNum + ":ow=" + outWidth + ":oh" + outHeight);
             } else {
                 commands.add("rotate=PI/"+ angleNum);
@@ -359,6 +388,11 @@ public class VideoOperation {
      */
     public Result videoFps(String inputVideo, Integer fps, String outputVideo) {
 //      ffmpeg -y -i in.mp4 -r 15 out.mp4
+        if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputVideo)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(outputVideo);
+
         try {
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
@@ -367,8 +401,10 @@ public class VideoOperation {
             commands.add("-i");
             commands.add(inputVideo);
 
-            commands.add("-r");
-            commands.add(String.valueOf(fps));
+            if(StrUtils.checkNotBlank(outputVideo)) {
+                commands.add("-r");
+                commands.add(String.valueOf(fps));
+            }
 
             commands.add(outputVideo);
 
@@ -390,9 +426,12 @@ public class VideoOperation {
      */
     public Result gifConvertToVideo(String gif, String outputVideo) {
 //      ffmpeg -i in.gif -vf scale=420:-2,format=yuv420p out.mp4  // gif --> mp4
-        try {
-            BaseFileUtil.checkAndMkdir(outputVideo);
+        if(StrUtils.checkBlank(gif) || StrUtils.checkBlank(outputVideo)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(outputVideo);
 
+        try {
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
 
@@ -426,6 +465,10 @@ public class VideoOperation {
     public Result videoConvertToGif(String inputVideo,  String outputGif, boolean highQuality) {
 //      ffmpeg -i src.mp4 -b 2048k des.gif
 //      ffmpeg -i src.mp4 des.gif
+        if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputGif)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(outputGif);
         try {
             BaseFileUtil.checkAndMkdir(outputGif);
 
@@ -465,15 +508,21 @@ public class VideoOperation {
     public Result videoCut(String inputVideo,String startTime, String seconds, String outputVideo) {
 //      ffmpeg -ss 10 -t 15 -accurate_seek -i test.mp4 -codec copy -avoid_negative_ts 1 cut.mp4
 //      ffmpeg -i src.mp4  -ss 00:00:00 -t 00:00:20 des.mp4
-        try {
-            BaseFileUtil.checkAndMkdir(outputVideo);
+        if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(startTime) || StrUtils.checkBlank(seconds) || StrUtils.checkBlank(outputVideo)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(outputVideo);
 
+        try {
             List<String> commands = new ArrayList<>();
             commands.add(ffmpegEXE);
 
             commands.add("-y");
             commands.add("-ss");
             commands.add(startTime);
+
+            commands.add("-t");
+            commands.add(seconds);
 
             commands.add("-accurate_seek");
 
@@ -496,20 +545,4 @@ public class VideoOperation {
         }
     }
 
-
-
-
-    /*
-    *
-    *
-    * if (System.getProperty("os.name").toLowerCase().indexOf("linux") >= 0) {
-                process = Runtime.getRuntime().exec(new String[]{"sh", "-c", commands});
-            } else {
-                ProcessBuilder builder = new ProcessBuilder(command);
-                builder.redirectErrorStream(true);
-                process = builder.start();
-            }
-
-    *
-    * */
 }

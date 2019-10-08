@@ -14,8 +14,8 @@ public class AudioTest {
 
     @Test
     public void audioScaleTest() {
-        String inputPath = "/Users/alan.chen/Documents/notes/test/2222.mp4";
-        String outPutPath = "/Users/alan.chen/Documents/notes/test/1/out.mp4";
+        String inputPath = "/Users/alan.chen/Documents/notes/VideoTest/2222.mp4";
+        String outPutPath = "/Users/alan.chen/Documents/notes/VideoTest/1/out.mp4";
         VideoOperation ffmpeg = VideoOperation.builder(ffmpegEXE);
         Result result = ffmpeg.videoScale(inputPath,"1080","1920", outPutPath);
         System.out.println(result.getCode());

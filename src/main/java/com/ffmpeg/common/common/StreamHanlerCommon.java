@@ -31,7 +31,9 @@ public class StreamHanlerCommon {
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            stdout.close();
+            if(stdout != null) {
+               stdout.close();
+            }
         }
         return result;
     }

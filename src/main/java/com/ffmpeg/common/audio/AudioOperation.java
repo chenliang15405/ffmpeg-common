@@ -4,7 +4,7 @@ import com.ffmpeg.common.FFMpegExceptionn;
 import com.ffmpeg.common.common.StreamHanlerCommon;
 import com.ffmpeg.common.response.Result;
 import com.ffmpeg.common.utils.BaseFileUtil;
-import org.apache.commons.lang3.StringUtils;
+import com.ffmpeg.common.utils.StrUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class AudioOperation {
      * @return
      */
     public Result audioConcat(String bgmOutPath, String... bgmInputPath) {
-        if(StringUtils.isBlank(bgmOutPath) || bgmInputPath.length <= 0) {
+        if(StrUtils.checkBlank(bgmOutPath) || bgmInputPath.length <= 0) {
             throw new FFMpegExceptionn("请输入正确的音频输入和输出路径");
         }
         BaseFileUtil.checkAndMkdir(bgmOutPath);
@@ -93,7 +93,7 @@ public class AudioOperation {
         Matcher matcher = pattern.matcher(startTime);
         Matcher matcher1 = pattern.matcher(endTime);
         if(!matcher.matches() || !matcher1.matches()) {
-            throw new FFMpegExceptionn("时间格式错误");
+            throw new FFMpegExceptionn("输入的时间格式错误");
         }
         try {
             BaseFileUtil.checkAndMkdir(bgmOutPath);
@@ -122,7 +122,7 @@ public class AudioOperation {
      */
     public Result getBgmFromVideo(String inputVideo, String outAudio) {
         //ffmpeg -y -i source.mp4 -vn output.wav
-        if(StringUtils.isBlank(inputVideo) || StringUtils.isBlank(outAudio)) {
+        if(StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outAudio)) {
             throw new FFMpegExceptionn("请输入正确的路径");
         }
         BaseFileUtil.checkAndMkdir(outAudio);
