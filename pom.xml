@@ -25,6 +25,18 @@
         <url>https://github.com/chenliang15405/ffmpeg-common</url>
         <connection>https://github.com/chenliang15405/ffmpeg-common.git</connection>
     </scm>
+    <developers>
+        <developer>
+            <name>tangsong</name>
+            <id>tangsong</id>
+            <email>1165243776@qq.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
+
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
