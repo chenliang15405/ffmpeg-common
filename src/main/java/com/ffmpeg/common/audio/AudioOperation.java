@@ -146,5 +146,114 @@ public class AudioOperation {
         }
     }
 
+    /**
+     * 转换音频格式
+     *
+     * @param inputAudio 输入视频绝对路径
+     * @param outAudio 输出音频绝对路径
+     * @return
+     */
+    public Result transFormatAudio(String inputAudio, String outAudio) {
+        //ffmpeg -y -i source.amr  output.mp3
+        if(StrUtils.checkBlank(inputAudio) || StrUtils.checkBlank(outAudio)) {
+            throw new FFMpegExceptionn("请输入正确的路径");
+        }
+        BaseFileUtil.checkAndMkdir(outAudio);
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-y");
+            commands.add("-i");
+            commands.add(inputAudio);
+
+            commands.add(outAudio);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+    /**
+     * 将其他格式的音频或视频转成AMR
+     *
+     * @param inputAudio 输入视频/音频绝对路径
+     * @param outAudio 输出音频绝对路径
+     * @return
+     */
+    public Result transFormatAmrAudio(String inputAudio, String outAudio) {
+        // ffmpeg -i test.mp3 -c:a libopencore_amrnb -ac 1 -ar 8000 -b:a 12.20k -y test.amr
+        if(StrUtils.checkBlank(inputAudio) || StrUtils.checkBlank(outAudio)) {
+            throw new FFMpegExceptionn("请输入正确的路径");
+        }
+        BaseFileUtil.checkAndMkdir(outAudio);
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-y");
+            commands.add("-i");
+            commands.add(inputAudio);
+
+            commands.add("-c:a");
+            commands.add("libopencore_amrnb");
+            commands.add("-ac");
+            commands.add("1");
+            commands.add("-ar");
+            commands.add("8000");
+            commands.add("-b:a");
+            commands.add("12.20k");
+
+            commands.add(outAudio);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+
+    /**
+     * 转换音频格式 mp3编码方式采用的是libmp3lame
+     *
+     * @param inputAudio 输入视频绝对路径
+     * @param outAudio 输出音频绝对路径
+     * @return
+     */
+    public Result transFormatToMp3Audio(String inputAudio, String outAudio) {
+        // ffmpeg -y -i amr.amr -acodec libmp3lame mp33.mp3
+        if(StrUtils.checkBlank(inputAudio) || StrUtils.checkBlank(outAudio)) {
+            throw new FFMpegExceptionn("请输入正确的路径");
+        }
+        BaseFileUtil.checkAndMkdir(outAudio);
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-y");
+            commands.add("-i");
+            commands.add(inputAudio);
+
+            commands.add("-acodec");
+            commands.add("libmp3lame");
+
+            commands.add(outAudio);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
 
 }
