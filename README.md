@@ -19,7 +19,7 @@
     <dependency>
         <groupId>com.github.chenliang15405</groupId>
         <artifactId>ffmpeg-common</artifactId>
-        <version>2.0</version>
+        <version>3.0</version>
     </dependency>
     ```
 
