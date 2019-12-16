@@ -7,6 +7,7 @@ import com.ffmpeg.common.utils.BaseFileUtil;
 import com.ffmpeg.common.utils.StrUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,13 +77,13 @@ public class VideoOperation {
     /**
      * 保留视频原声合成音频
      *
-     * @param bgm
-     * @param inputVideo
-     * @param outputVideo
-     * @param seconds
+     * @param bgm 背景音乐路径
+     * @param inputVideo 输入音频路径
+     * @param outputVideo 输出视频路径
+     * @param seconds 输出视频秒数
      * @return
      */
-    public Result mergeVideoAndBgm(String bgm, String inputVideo, String outputVideo, double seconds) {
+    public Result mergeVideoAndBgmWithOrigin(String bgm, String inputVideo, String outputVideo, double seconds) {
 //     保留原声合并音视频 ffmpeg -i bgm.mp3 -i input.mp4 -t 6 -filter_complex amix=inputs=2 output.mp4
         try {
             if(StrUtils.checkBlank(bgm) || StrUtils.checkBlank(inputVideo) || StrUtils.checkBlank(outputVideo) || seconds <= 0) {
@@ -210,8 +211,8 @@ public class VideoOperation {
     /**
      * 去除视频的音频
      *
-     * @param inputVideo
-     * @param outputVideo
+     * @param inputVideo 输入视频绝对路径
+     * @param outputVideo 输出视频绝对路径
      * @return
      */
     public Result wipeAudio(String inputVideo, String outputVideo) {
@@ -543,6 +544,116 @@ public class VideoOperation {
         } catch (IOException e) {
             throw new FFMpegExceptionn(e.getMessage());
         }
+    }
+
+    /**
+     *  视频合并音频，给视频加上背景音乐，并不保留视频原声
+     *
+     * （此方法在Mac平台无效,ffmpeg version 4.2.1-tessus），暂不清楚是否ffmpeg版本问题
+     *  Mac平台使用方法：convertorWithBgmNoOriginCommon()
+     *
+     * @param videoInputPath 原始视频绝对路径
+     * @param videoOutPath  处理之后视频输出路径
+     * @param bgmInputPath  添加的背景音乐绝对路径
+     * @param seconds   输出视频的秒数
+     * @return
+     */
+    public Result mergeVideoAndBgmNoOrigin(String videoInputPath, String videoOutPath, String bgmInputPath, double seconds) {
+//        ffmpeg -i input.mp4 -i bgm.mp3 -t 7 -y out.mp4
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-i");
+            commands.add(videoInputPath);
+
+            commands.add("-i");
+            commands.add(bgmInputPath);
+
+            commands.add("-t");
+            commands.add(String.valueOf(seconds));
+
+            commands.add("-y");
+            commands.add(videoOutPath);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+    /**
+     * 视频合并音频，给视频加上背景音乐，并不保留视频原声，此方法比较通用，并且Mac可以使用
+     *
+     * @param videoInputPath  原始视频绝对路径
+     * @param videoOutPath  处理之后视频输出路径
+     * @param noSoundVideoPath  原始视频去除音频的输出绝对路径
+     * @param bgmInputPath  添加的背景音乐绝对路径
+     * @param seconds   输出视频的秒数
+     * @return
+     */
+    public Result convertorWithBgmNoOriginCommon(String videoInputPath, String videoOutPath, String noSoundVideoPath, String bgmInputPath, double seconds) {
+//        ffmpeg -i hi.mp4 -c:v copy -an nosound.mp4
+//        ffmpeg -i nosound.mp4 -i songs.mp3 -t 7.1 -c copy output.mp4
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-y");
+
+            commands.add("-i");
+            commands.add(videoInputPath);
+
+            commands.add("-c:v");
+            commands.add("copy");
+            commands.add("-an");
+            commands.add(noSoundVideoPath);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            StreamHanlerCommon.closeStreamQuietly(process);
+
+            // 转换nosound.mp4 为背景音乐的mp4
+            return convertNoSoundVideoToBgmVideo(videoOutPath,noSoundVideoPath,bgmInputPath,seconds);
+        } catch (Exception e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+    /**
+     * 将没有背景音乐的video转换为有背景音乐video
+     * 无声视频加上背景音乐
+     *
+     * @param videoOutPath
+     * @param noSoundVideoPath
+     * @param bgmInputPath
+     * @param seconds
+     * @throws IOException
+     */
+    private Result convertNoSoundVideoToBgmVideo(String videoOutPath, String noSoundVideoPath,String bgmInputPath, double seconds) throws IOException {
+        List<String> commands2 = new ArrayList<>();
+        commands2.add(ffmpegEXE);
+
+        commands2.add("-i");
+        commands2.add(noSoundVideoPath);
+
+        commands2.add("-i");
+        commands2.add(bgmInputPath);
+
+        commands2.add("-t");
+        commands2.add(String.valueOf(seconds));
+
+        commands2.add("-y");
+        commands2.add(videoOutPath);
+
+        ProcessBuilder builder2 = new ProcessBuilder(commands2);
+        Process process2 = builder2.start();
+
+        return StreamHanlerCommon.closeStreamQuietly(process2);
     }
 
 }

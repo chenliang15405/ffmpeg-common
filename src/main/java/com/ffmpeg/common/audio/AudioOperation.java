@@ -41,7 +41,7 @@ public class AudioOperation {
      * 将多个音频文件拼接为一个音频文件并输出
      *
      * @param bgmOutPath 输出音频文件
-     * @param bgmInputPath 输入的音频文件
+     * @param bgmInputPath 输入的音频文件, 多值参数
      * @return
      */
     public Result audioConcat(String bgmOutPath, String... bgmInputPath) {
@@ -81,8 +81,8 @@ public class AudioOperation {
      *
      * @param bgmInputPath 音频输入绝对路径
      * @param bgmOutPath 音频输出绝对路径
-     * @param startTime 开始时间
-     * @param endTime 截取秒数
+     * @param startTime 截取的开始时间
+     * @param endTime 截取的结束时间
      * @return
      */
     public Result audioCut(String bgmInputPath, String bgmOutPath, String startTime, String endTime) {
