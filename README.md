@@ -62,7 +62,7 @@
     | videoCut(String inputVideo,String startTime, String seconds, String outputVideo) | inputVideo: 原始需要操作视频的绝对路径<br>startTime 开始裁剪的时间 支持格式： 2  或  00:00:02 从2秒开始<br>seconds  剪裁持续的时间 支持格式： 3 或 00:00:03 持续3秒<br>outputVideo 输出视频的绝对路径 | 对视频的播放时间进行裁剪 |
     | mergeVideoAndBgmNoOrigin(String videoInputPath, String videoOutPath, String bgmInputPath, double seconds) | videoInputPath: 原始视频绝对路径<br>videoOutPath  处理之后视频输出路径<br>bgmInputPath  添加的背景音乐绝对路径<br> seconds   输出视频的秒数 | 视频合并音频，给视频加上背景音乐，并不保留视频原声(此方法在Mac平台无效) |
     | convertorWithBgmNoOriginCommon(String videoInputPath, String videoOutPath, String noSoundVideoPath, String bgmInputPath, double seconds) | videoInputPath: 原始视频绝对路径<br>videoOutPath: 处理之后视频输出路径<br>noSoundVideoPath: 原始视频去除音频的输出绝对路径<br>bgmInputPath: 添加的背景音乐绝对路径<br>seconds: 输出视频的秒数 | 视频合并音频，给视频加上背景音乐，并不保留视频原声，此方法比较通用，并且Mac可以使用 |
-
+    | transformVideoCover(String videoInputPath, String imagePath, String videoOutPath) | videoInputPath: 原始视频绝对路径<br>imagePath  替换的封面图片绝对路径<br>videoOutPath 新的视频输出路径<br> | 修改视频封面图片 |
 
 **2. AudioOperation 说明**
 
