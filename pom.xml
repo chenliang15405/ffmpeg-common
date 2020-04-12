@@ -6,7 +6,7 @@
 
     <groupId>com.github.chenliang15405</groupId>
     <artifactId>ffmpeg-common</artifactId>
-    <version>3.0</version>
+    <version>3.1</version>
     <packaging>jar</packaging>
     <name>ffmpeg-common</name>
 
