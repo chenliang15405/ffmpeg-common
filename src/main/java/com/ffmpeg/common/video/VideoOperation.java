@@ -7,7 +7,6 @@ import com.ffmpeg.common.utils.BaseFileUtil;
 import com.ffmpeg.common.utils.StrUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -654,6 +653,53 @@ public class VideoOperation {
         Process process2 = builder2.start();
 
         return StreamHanlerCommon.closeStreamQuietly(process2);
+    }
+
+    /**
+     * 修改视频封面图片
+     *
+     * @param videoInputPath 原始视频绝对路径
+     * @param imagePath  替换的封面图片绝对路径
+     * @param videoOutPath  新的视频输出绝对路径
+     * @return
+     */
+    public Result transformVideoCover(String videoInputPath, String imagePath, String videoOutPath) {
+        // -y 参数表示覆盖同名称文件
+        // ffmpeg -i x.mp4 -i 1.png -map 1 -map 0 -c copy -disposition:0 attached_pic -y y.mp4
+        if(StrUtils.checkBlank(videoInputPath) || StrUtils.checkBlank(imagePath) || StrUtils.checkBlank(videoOutPath)) {
+            throw new FFMpegExceptionn("请输入正确参数，参数不能为空");
+        }
+        BaseFileUtil.checkAndMkdir(videoOutPath);
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-i");
+            commands.add(videoInputPath);
+
+            commands.add("-i");
+            commands.add(imagePath);
+
+            commands.add("-map");
+            commands.add("1");
+            commands.add("-map");
+            commands.add("0");
+            commands.add("-c");
+            commands.add("copy");
+            commands.add("-disposition:0");
+            commands.add("attached_pic");
+
+            commands.add("-y");
+            commands.add(videoOutPath);
+
+            // TODO 使用单例模式、或者将该对象定义为静态属性变量即可，不用每次new
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
     }
 
 }

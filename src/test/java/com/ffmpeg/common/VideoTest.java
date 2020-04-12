@@ -58,4 +58,16 @@ public class VideoTest {
         System.out.println(result.getErrMessage());
     }
 
+    @Test
+    public void transformVideoCoverTest() {
+        String inputPath = "/Users/alan.chen/Documents/notes/test/11111.mp4";
+        String imagePath = "/Users/alan.chen/Documents/notes/test/mail.jpg";
+        String outPutPath = "/Users/alan.chen/Documents/notes/test/2/111_bg.mp4";
+        VideoOperation ffmpeg = VideoOperation.builder(ffmpegEXE);
+        Result result = ffmpeg.transformVideoCover(inputPath, imagePath, outPutPath);
+        Integer expected = 0;
+        Assert.assertEquals(expected, result.getCode());
+        System.out.println(result.getErrMessage());
+    }
+
 }
