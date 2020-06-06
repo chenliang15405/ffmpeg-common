@@ -15,6 +15,8 @@ public class VideoTest {
 
     private static final String ffmpegEXE = "/Users/alan.chen/Documents/notes/ffmpeg";
 
+    public static final Integer EXPECTED = 0;
+
     @Test
     public void testConverTest() throws IOException {
         String inputPath = "/Users/alan.chen/Documents/notes/test/2222.mp4";
@@ -53,8 +55,7 @@ public class VideoTest {
         String audioPath = "/Users/alan.chen/Documents/notes/young.mp3";
         VideoOperation ffmpeg = VideoOperation.builder(ffmpegEXE);
         Result result = ffmpeg.convertorWithBgmNoOriginCommon(inputPath, outPutPath, noSoundPath, audioPath, 5);
-        Integer expected = 0;
-        Assert.assertEquals(expected, result.getCode());
+        Assert.assertEquals(EXPECTED, result.getCode());
         System.out.println(result.getErrMessage());
     }
 
@@ -65,9 +66,19 @@ public class VideoTest {
         String outPutPath = "/Users/alan.chen/Documents/notes/test/2/111_bg.mp4";
         VideoOperation ffmpeg = VideoOperation.builder(ffmpegEXE);
         Result result = ffmpeg.transformVideoCover(inputPath, imagePath, outPutPath);
-        Integer expected = 0;
-        Assert.assertEquals(expected, result.getCode());
+        Assert.assertEquals(EXPECTED, result.getCode());
         System.out.println(result.getErrMessage());
+    }
+
+    @Test
+    public void mergeMultiOnlineVideos() {
+        String inputPath = "/Users/alan.chen/Documents/notes/test/video.txt";
+        String outPutPath = "/Users/alan.chen/Documents/notes/test/mutionout.mp4";
+        VideoOperation ffmpeg = VideoOperation.builder(ffmpegEXE);
+        Result result = ffmpeg.mergeMultiOnlineVideos(inputPath, outPutPath);
+        Assert.assertEquals(EXPECTED, result.getCode());
+        System.out.println(result.getErrMessage());
+        System.out.println(result);
     }
 
 }

@@ -6,6 +6,7 @@ import com.ffmpeg.common.response.Result;
 import com.ffmpeg.common.utils.BaseFileUtil;
 import com.ffmpeg.common.utils.StrUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -693,6 +694,62 @@ public class VideoOperation {
             commands.add(videoOutPath);
 
             // TODO 使用单例模式、或者将该对象定义为静态属性变量即可，不用每次new
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+    /**
+     * 合并多个在线视频（ts格式）
+     *
+     * @param videoListFilePath 视频list文件
+     * @apiNote               文件格式：video.txt or video.list
+     *
+     *                           file 'http://xxxxx/filename.ts'
+     *                           file 'http://xxxxx/filename.ts'
+     *
+     *
+     * 参考sample文件：docs/video-example/video.txt
+     *
+     *
+     * @param videoOutPath 视频输出路径
+     * @return
+     */
+    public Result mergeMultiOnlineVideos(String videoListFilePath, String videoOutPath) {
+        // ffmpeg -f concat -safe 0 -protocol_whitelist "file,http,https,tcp,tls" -i video.txt -c copy -y out.mp4
+        if(StrUtils.checkBlank(videoOutPath)) {
+            throw new FFMpegExceptionn("videoOutPath must be valid");
+        }
+        BaseFileUtil.checkAndMkdir(videoOutPath);
+        File file = new File(videoListFilePath);
+        if(!file.exists()) {
+            throw new FFMpegExceptionn("videoListFilePath not found");
+        }
+
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-f");
+            commands.add("concat");
+
+            commands.add("-safe");
+            commands.add("0");
+
+            commands.add("-protocol_whitelist");
+            commands.add("file,http,https,tcp,tls");
+            commands.add("-i");
+            commands.add(videoListFilePath);
+            commands.add("-c");
+            commands.add("copy");
+
+            commands.add("-y");
+            commands.add(videoOutPath);
+
             ProcessBuilder builder = new ProcessBuilder(commands);
             Process process = builder.start();
 
