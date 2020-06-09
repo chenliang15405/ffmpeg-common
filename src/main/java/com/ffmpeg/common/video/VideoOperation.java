@@ -1,10 +1,12 @@
 package com.ffmpeg.common.video;
 
 import com.ffmpeg.common.FFMpegExceptionn;
+import com.ffmpeg.common.common.ProcessCommand;
 import com.ffmpeg.common.common.StreamHanlerCommon;
 import com.ffmpeg.common.response.Result;
 import com.ffmpeg.common.utils.BaseFileUtil;
 import com.ffmpeg.common.utils.StrUtils;
+import com.sun.xml.internal.rngom.parse.host.Base;
 
 import java.io.File;
 import java.io.IOException;
@@ -704,30 +706,29 @@ public class VideoOperation {
     }
 
     /**
-     * 合并多个在线视频（ts格式）
+     * 合并多个在线视频（ts格式）, 根据文件中在线视频地址顺序合并
      *
-     * @param videoListFilePath 视频list文件
+     * @param videoListFile 绝对路径下的视频list文件
      * @apiNote               文件格式：video.txt or video.list
      *
-     *                           file 'http://xxxxx/filename.ts'
-     *                           file 'http://xxxxx/filename.ts'
+     *                           file 'http://xxxxx/filename1.ts'
+     *                           file 'http://xxxxx/filename2.ts'
      *
      *
-     * 参考sample文件：docs/video-example/video.txt
+     * 参考sample文件：docs/video-example/video-online-example.txt
      *
      *
      * @param videoOutPath 视频输出路径
      * @return
      */
-    public Result mergeMultiOnlineVideos(String videoListFilePath, String videoOutPath) {
+    public Result mergeMultiOnlineVideos(File videoListFile, String videoOutPath) {
         // ffmpeg -f concat -safe 0 -protocol_whitelist "file,http,https,tcp,tls" -i video.txt -c copy -y out.mp4
         if(StrUtils.checkBlank(videoOutPath)) {
             throw new FFMpegExceptionn("videoOutPath must be valid");
         }
         BaseFileUtil.checkAndMkdir(videoOutPath);
-        File file = new File(videoListFilePath);
-        if(!file.exists()) {
-            throw new FFMpegExceptionn("videoListFilePath not found");
+        if(!videoListFile.exists() || !videoListFile.isFile()) {
+            throw new FFMpegExceptionn("videoListFile not found");
         }
 
         try {
@@ -743,7 +744,7 @@ public class VideoOperation {
             commands.add("-protocol_whitelist");
             commands.add("file,http,https,tcp,tls");
             commands.add("-i");
-            commands.add(videoListFilePath);
+            commands.add(videoListFile.getAbsolutePath());
             commands.add("-c");
             commands.add("copy");
 
@@ -756,6 +757,48 @@ public class VideoOperation {
             return StreamHanlerCommon.closeStreamQuietly(process);
         } catch (IOException e) {
             throw new FFMpegExceptionn(e.getMessage());
+        }
+    }
+
+
+    /**
+     * 合并多个视频文件(此方法只适用ts格式文件)
+     *
+     * @param fileNameList 需要合并的视频文件集合，文件名称为绝对路径
+     * @param videoOutPath 视频输出绝对路径
+     * @return 返回结果code和信息
+     */
+    public Result mergeMultiVideosOfTsFormat(List<String> fileNameList, String videoOutPath) {
+        // ffmpeg -f concat -safe 0 -i video.txt -c copy -y out.mp4
+        if(StrUtils.checkBlank(videoOutPath)) {
+            throw new FFMpegExceptionn("videoOutPath must be valid");
+        }
+        if(fileNameList == null || fileNameList.isEmpty()) {
+            throw new FFMpegExceptionn("fileNameList must be valid");
+        }
+        BaseFileUtil.checkAndMkdir(videoOutPath);
+
+        String filenames = VideoFormatter.fileNameFormat(fileNameList);
+
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(ffmpegEXE);
+
+            commands.add("-i");
+            commands.add("concat:" + filenames);
+
+            commands.add("-c");
+            commands.add("copy");
+
+            commands.add("-y");
+            commands.add(videoOutPath);
+
+            ProcessBuilder builder = new ProcessBuilder(commands);
+            Process process = builder.start();
+
+            return StreamHanlerCommon.closeStreamQuietly(process);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e);
         }
     }
 

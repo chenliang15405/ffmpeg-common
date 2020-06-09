@@ -4,7 +4,7 @@ package com.ffmpeg.common;
  * @auther alan.chen
  * @time 2019/9/17 2:48 PM
  */
-public class FFMpegExceptionn extends RuntimeException{
+public class FFMpegExceptionn extends RuntimeException {
 
     public FFMpegExceptionn() {
         super();
