@@ -11,6 +11,7 @@ import com.sun.xml.internal.rngom.parse.host.Base;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -762,13 +763,13 @@ public class VideoOperation {
 
 
     /**
-     * 合并多个视频文件(此方法只适用ts格式文件)
+     * 合并多个视频文件(此方法只适用ts格式文件,或者mpg/mpeg格式文件)
      *
      * @param fileNameList 需要合并的视频文件集合，文件名称为绝对路径
      * @param videoOutPath 视频输出绝对路径
      * @return 返回结果code和信息
      */
-    public Result mergeMultiVideosOfTsFormat(List<String> fileNameList, String videoOutPath) {
+    public Result mergeMultiVideosOfTsOrMpegFormat(List<String> fileNameList, String videoOutPath) {
         // ffmpeg -f concat -safe 0 -i video.txt -c copy -y out.mp4
         if(StrUtils.checkBlank(videoOutPath)) {
             throw new FFMpegExceptionn("videoOutPath must be valid");
@@ -800,6 +801,53 @@ public class VideoOperation {
         } catch (IOException e) {
             throw new FFMpegExceptionn(e);
         }
+    }
+
+    /**
+     * 根据指定文件中定义视频绝对路径信息，按照顺序合并视频。
+     *
+     *
+     * @param videoListFile 定义合并视频的文件，按照指定格式访问
+     *                       文件格式：video.txt or video.list
+     *
+     *                        file 'http://xxxxx/filename1.ts'
+     *                        file 'http://xxxxx/filename2.ts'
+     *
+     *  文件示例：docs/video-example/video-example.txt
+     *
+     *
+     * @apiNote 注意： 合并的视频必须相同的分辨率和格式！！！否则合成视频不正确
+     *
+     * @param videoOutPath 视频输出绝对路径文件名
+     * @return
+     */
+    public Result mergeMultiVideosByFile(File videoListFile, String videoOutPath) {
+        if(StrUtils.checkBlank(videoOutPath)) {
+            throw new FFMpegExceptionn("videoOutPath must be valid");
+        }
+        if(!videoListFile.exists() || !videoListFile.isFile()) {
+            throw new FFMpegExceptionn("videoListFile not found");
+        }
+        BaseFileUtil.checkAndMkdir(videoOutPath);
+
+        List<String> commands = new ArrayList<>();
+        commands.add(ffmpegEXE);
+
+        commands.add("-f");
+        commands.add("concat");
+
+        commands.add("-safe");
+        commands.add("0");
+
+        commands.add("-i");
+        commands.add(videoListFile.getAbsolutePath());
+        commands.add("-c");
+        commands.add("copy");
+
+        commands.add("-y");
+        commands.add(videoOutPath);
+
+        return ProcessCommand.start(commands);
     }
 
 }

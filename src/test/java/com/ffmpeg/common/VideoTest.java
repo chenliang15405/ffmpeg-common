@@ -102,7 +102,7 @@ public class VideoTest {
         list.add("/Users/alan.chen/Documents/notes/test/2/1509761539_173.ts");
         String outPutPath = "/Users/alan.chen/Documents/notes/test/mergeMultiVideosOfTsFormat.mp4";
         VideoOperation ffmpeg = VideoOperation.builder(ffmpegEXE);
-        Result result = ffmpeg.mergeMultiVideosOfTsFormat(list, outPutPath);
+        Result result = ffmpeg.mergeMultiVideosOfTsOrMpegFormat(list, outPutPath);
         Assert.assertEquals(EXPECTED, result.getCode());
         System.out.println(result.getErrMessage());
         System.out.println(result);
@@ -116,5 +116,15 @@ public class VideoTest {
         Result result = ffmpeg.mergeMultiVideosByFile(new File(inputPath), outPutPath);
         Assert.assertEquals(EXPECTED, result.getCode());
     }
+
+    @Test
+    public void mergeMultiVideosByDirTest() {
+        String dir = "/Users/alan.chen/Documents/notes/test/dir";
+        String outPutPath = "/Users/alan.chen/Documents/notes/test/dir/mergeVideo.mp4";
+        VideoOperation ffmpeg = VideoOperation.builder(ffmpegEXE);
+        Result result = ffmpeg.autoMergeMultiVideosByDir(dir, outPutPath);
+        Assert.assertEquals(EXPECTED, result.getCode());
+    }
+
 
 }
