@@ -850,4 +850,48 @@ public class VideoOperation {
         return ProcessCommand.start(commands);
     }
 
+    /**
+     * 根据文件目录，自动合并该目录下所有视频
+     *
+     * 合成的顺序按照文件名称进行排序，建议将名称命名为序号001、002、003...
+     *
+     * TODO 增加排序
+     *
+     * @param dir 视频文件目录绝对路径
+     * @param videoOutPath 视频输出绝对路径
+     * @return
+     */
+    public Result autoMergeMultiVideosByDir(String dir, String videoOutPath) {
+        // 遍历文件夹
+        if(!BaseFileUtil.hashFile(dir)) {
+            throw new FFMpegExceptionn("File must be not null");
+        }
+        BaseFileUtil.checkAndMkdir(videoOutPath);
+        // 判断文件是否统一后缀，如果不统一后缀，抛出异常
+        File[] files = BaseFileUtil.listFiles(dir);
+
+        if(!BaseFileUtil.unifySuffix(files)) {
+            throw new FFMpegExceptionn("All video files must have the same suffix");
+        }
+
+        // 如果是mpg/mpeg文件可以直接转换调用方法合并
+        if(BaseFileUtil.isMpgOrMpeg(files)) {
+            // 合并mpg/mpeg
+            return mergeMultiVideosOfTsOrMpegFormat(Arrays.asList(BaseFileUtil.list(dir)), videoOutPath);
+        }
+
+        File tempVideoFile = null;
+        try {
+            tempVideoFile = VideoFormatter.createTempVideoFile(dir);
+
+            return mergeMultiVideosByFile(tempVideoFile, videoOutPath);
+        } catch (IOException e) {
+            throw new FFMpegExceptionn(e);
+        } finally {
+            if(tempVideoFile != null) {
+                tempVideoFile.deleteOnExit();
+            }
+        }
+    }
+
 }
