@@ -11,7 +11,7 @@
 
 - jar包请到maven仓库中下载即可
 
-    [maven仓库地址](https://mvnrepository.com/artifact/com.github.chenliang15405/ffmpeg-common/2.0)
+    [maven仓库地址](https://mvnrepository.com/artifact/com.github.chenliang15405/ffmpeg-common/3.2)
 
 - maven构建依赖：
 
@@ -19,7 +19,7 @@
     <dependency>
         <groupId>com.github.chenliang15405</groupId>
         <artifactId>ffmpeg-common</artifactId>
-        <version>3.0</version>
+        <version>3.2</version>
     </dependency>
     ```
 
@@ -38,7 +38,7 @@
           // 将mp4格式转换为flv格式
           Result result = ffmpeg.videoConvert(inputPath, outPutPath);  
           // 返回结果为0表示正确
-          System.out.println(result.getCode());
+          Assert.assertEquals(0, result.getCode());
           // 转换的信息
           System.out.println(result.getErrMessage());  
        }
@@ -63,6 +63,13 @@
     | mergeVideoAndBgmNoOrigin(String videoInputPath, String videoOutPath, String bgmInputPath, double seconds) | videoInputPath: 原始视频绝对路径<br>videoOutPath  处理之后视频输出路径<br>bgmInputPath  添加的背景音乐绝对路径<br> seconds   输出视频的秒数 | 视频合并音频，给视频加上背景音乐，并不保留视频原声(此方法在Mac平台无效) |
     | convertorWithBgmNoOriginCommon(String videoInputPath, String videoOutPath, String noSoundVideoPath, String bgmInputPath, double seconds) | videoInputPath: 原始视频绝对路径<br>videoOutPath: 处理之后视频输出路径<br>noSoundVideoPath: 原始视频去除音频的输出绝对路径<br>bgmInputPath: 添加的背景音乐绝对路径<br>seconds: 输出视频的秒数 | 视频合并音频，给视频加上背景音乐，并不保留视频原声，此方法比较通用，并且Mac可以使用 |
     | transformVideoCover(String videoInputPath, String imagePath, String videoOutPath) | videoInputPath: 原始视频绝对路径<br>imagePath  替换的封面图片绝对路径<br>videoOutPath 新的视频输出路径<br> | 修改视频封面图片 |
+    | mergeMultiOnlineVideos(File videoListFile, String videoOutPath) | videoListFile: 绝对路径下的视频list文件（参考sample文件：docs/video-example/video-online-example.txt）<br>videoOutPath: 新视频输出路径<br> | 合并多个在线视频（ts格式）, 根据文件中在线视频地址顺序合并（（参考sample文件：docs/video-example/video-online-example.txt）） |
+    | mergeMultiVideosOfTsOrMpegFormat(List<String> fileNameList, String videoOutPath) | fileNameList: 需要合并的视频文件集合，文件名称为绝对路径<br>videoOutPath: 视频输出绝对路径 | 合并多个视频文件(此方法只适用ts格式文件,或者mpg/mpeg格式文件) |
+    | mergeMultiVideosByFile(File videoListFile, String videoOutPath) | videoListFile: 定义合并视频的文件，按照指定格式访问（文件示例：docs/video-example/video-example.txt）<br>videoOutPath: 视频输出绝对路径文件名| 根据自定义文件中定义视频绝对路径信息，按照顺序合并视频（文件示例：docs/video-example/video-example.txt） |
+    | autoMergeMultiVideosByDir(String dir, String videoOutPath) | dir: 视频文件目录绝对路径<br>videoOutPath: 视频输出绝对路径 | 根据文件目录，自动合并该目录下所有视频（默认合成的顺序按照文件名称进行排序）|
+
+- **合并视频注意事项**
+  - 合并的多个视频必须相同的分辨率，否则合成的视频会黑屏
 
 **2. AudioOperation 说明**
 
@@ -78,7 +85,7 @@
          // 转换为音频的amr格式为mp3格式
          Result result = ffmpeg.transFormatToMp3Audio(inputPath, outPutPath);
          // 返回结果为0表示转换成功
-         System.out.println(result.getCode());
+         Assert.assertEquals(0, result.getCode());
          // 转换的信息
          System.out.println(result.getErrMessage());
       }
