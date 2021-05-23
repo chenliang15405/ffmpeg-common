@@ -23,7 +23,8 @@
     </dependency>
     ```
 
-**1. VideoOperation**
+## 1. VideoOperation 说明
+> 视频操作对象，`VideoOperation`提供了操作视频的多种API
 
 - **使用示例：**
     
@@ -71,7 +72,8 @@
 - **合并视频注意事项**
   - 合并的多个视频必须相同的分辨率，否则合成的视频会黑屏
 
-**2. AudioOperation 说明**
+## 2. AudioOperation 说明
+> 音频操作对象，`AudioOperation`提供了操作视频的多种API
 
 - **使用示例：**
     ```java
